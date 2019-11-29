@@ -9,10 +9,18 @@ const Ingredients = () => {
   const [userIngredients, setuserIngredients] = useState([]);
 
   const addIngredientHandler = ingredient => {
-    setuserIngredients(prevIngredients => [
-      ...prevIngredients, 
-      {id: Math.random.toString(), ...ingredient}
-    ]);
+    fetch('https://react-hooks-2339a.firebaseio.com/ingredients.json', {
+      method: 'POST',
+      body: JSON.stringify(ingredient),
+      headers: {'Content-type': 'application/json'}
+    }).then(response => {
+      return response.json();
+    }).then(responseData => {
+      setuserIngredients(prevIngredients => [
+        ...prevIngredients, 
+        {id: responseData.name, ...ingredient}
+      ]);
+    })
   }
 
   return (
