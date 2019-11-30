@@ -27,7 +27,11 @@ const Ingredients = () => {
 
   useEffect(() => {
     console.log("RENDERING INGREDIENTS", userIngredients)
-  }, [userIngredients])
+  }, [userIngredients]);
+
+  const filteredIngredientsHandler = filteredIngredients => {
+    setuserIngredients(filteredIngredients);
+  }
 
   const addIngredientHandler = ingredient => {
     fetch('https://react-hooks-2339a.firebaseio.com/ingredients.json', {
@@ -49,7 +53,7 @@ const Ingredients = () => {
       <IngredientForm onAddIngredient={addIngredientHandler} />
 
       <section>
-        <Search />
+        <Search onLoadIngredients={filteredIngredientsHandler}/>
         <IngredientList ingredients={userIngredients} onRemoveItem={() => { }} />
       </section>
     </div>
