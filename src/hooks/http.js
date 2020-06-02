@@ -1,5 +1,13 @@
 import { useReducer, useCallback } from 'react';
 
+const initialState = {
+  loading: false,
+  error: null,
+  data: null,
+  extra: null,
+  identifier: null
+}
+
 const httpReducer = (curHttpState, action) => {
   switch (action.type) {
     case 'SEND':
@@ -9,38 +17,34 @@ const httpReducer = (curHttpState, action) => {
     case 'ERROR':
       return { loading: false, error: action.errorMessage };
     case 'CLEAR':
-      return { ...curHttpState, error: null }
+      return initialState;
     default:
       throw new Error('Should not be reached');
   }
 }
 
 const useHttp = () => {
-  const [httpState, dispatchHttp] = useReducer(httpReducer, {
-    loading: false,
-    error: null,
-    data: null,
-    extra: null,
-    identifier: null
-  });
- // `https://react-hooks-2339a.firebaseio.com/ingredients/${ingredientId}.json`
+  const [httpState, dispatchHttp] = useReducer(httpReducer);
+
+  const clear = useCallback(() => dispatchHttp({ type: 'CLEAR' }), []);
+
   const sendRequest = useCallback((url, method, body, reqExtra, reqIdentifier) => {
-    dispatchHttp({type:'SEND', identifier: reqIdentifier});
+    dispatchHttp({ type: 'SEND', identifier: reqIdentifier });
     fetch(url, {
       method: method,
       body: body,
-      headers:{
+      headers: {
         'Content-Type': 'application/json'
       }
     }
     ).then(response => {
       return response.json()
     })
-    .then(responseData => {
-      dispatchHttp({type: 'RESPONSE', responseData: responseData, extra: reqExtra})
-    }).catch(error => {
-      dispatchHttp({ type: 'ERROR', errorMessage: error.message });
-    });
+      .then(responseData => {
+        dispatchHttp({ type: 'RESPONSE', responseData: responseData, extra: reqExtra })
+      }).catch(error => {
+        dispatchHttp({ type: 'ERROR', errorMessage: error.message });
+      });
   }, []);
 
   return {
@@ -49,7 +53,8 @@ const useHttp = () => {
     error: httpState.error,
     sendRequest: sendRequest,
     reqExtra: httpState.extra,
-    reqIdentifier: httpState.identifier
+    reqIdentifier: httpState.identifier,
+    clear: clear
   };
 }
 
